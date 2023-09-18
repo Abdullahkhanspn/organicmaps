@@ -605,18 +605,24 @@ area|z17-[landuse=commercial]
 
 area|z16-[building],
 node|z16-[building],
-area|z16-[addr:housenumber][addr:street],
-node|z16-[addr:housenumber][addr:street]
 {text: name;text-color: @building_label;text-position: center;}
 area|z16-[building]::int_name,
 node|z16-[building]::int_name,
-area|z16-[addr:housenumber][addr:street]::int_name,
-node|z16-[addr:housenumber][addr:street]::int_name
 {text:int_name;text-color: @building_label;text-position: center;}
+
+node|z16-[addr:housenumber][addr:street],
+{text: name; text-color: @housenumber; text-position: center;}
+node|z16-[addr:housenumber][addr:street]::int_name,
+{text: int_name; text-color: @housenumber; text-position: center;}
+
 node|z19-[entrance],
 node|z18-[entrance=main],
 node|z18-[entrance=exit],
 node|z18-[amenity=loading_dock],
+{text-color: @building_label;}
+node|z19-[entrance]::flats,
+node|z18-[entrance=main]::flats,
+node|z18-[entrance=exit]::flats,
 {text-color: @building_label;}
 
 /* 8.1 Pier */
@@ -633,33 +639,26 @@ node|z17-[man_made=breakwater]
 {text: name;font-size: 10;text-color:@poi_label;fill-opacity: 1;}
 
 /*	8.2 Building */
-area|z16[building],
-node|z16[building],
-area|z16[addr:housenumber][addr:street],
-node|z16[addr:housenumber][addr:street],
-{text:"addr:housename";font-size: 9;text-color: @housename;}
 
-area|z17[building],
-node|z17[building],
-area|z17[addr:housenumber][addr:street],
-node|z17[addr:housenumber][addr:street]
-{font-size: 9.6;}
-area|z17[building]::int_name,
-node|z17[building]::int_name,
-area|z17[addr:housenumber][addr:street]::int_name,
-node|z17[addr:housenumber][addr:street]::int_name
-{font-size: 8.4;}
-
+area|z16-17[building],
+node|z16-17[building],
+{font-size: 9;}
+area|z16-17[building]::int_name,
+node|z16-17[building]::int_name,
+{font-size: 8;}
 area|z18-[building],
 node|z18-[building],
-area|z18-[addr:housenumber][addr:street],
-node|z18-[addr:housenumber][addr:street]
 {font-size: 11;}
 area|z18-[building]::int_name,
 node|z18-[building]::int_name,
-area|z18-[addr:housenumber][addr:street]::int_name,
-node|z18-[addr:housenumber][addr:street]::int_name
 {font-size: 10;}
+
+node|z16-17[addr:housenumber][addr:street],
+{font-size: 8;}
+node|z18-[addr:housenumber][addr:street],
+{font-size: 10;}
+node|z16-[addr:housenumber][addr:street]::int_name,
+{font-size: 8;}
 
 node|z19-[entrance],
 node|z18-[amenity=loading_dock],
@@ -669,7 +668,7 @@ node|z18-[entrance=exit],
 node|z18-[entrance=main],
 {icon-image: main_entrance-s.svg;font-size: 10;text: ref;text-offset-x: 1;}
 node|z19-[entrance]::flats
-{text: "addr:flats";font-size: 12;text-offset-y: 10;}
+{text: "addr:flats";font-size: 10;text-offset-y: 10;}
 
 /* 8.3 Airports */
 area|z14-[aeroway=terminal]

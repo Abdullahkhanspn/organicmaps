@@ -160,7 +160,7 @@ public class OnmapDownloader implements MwmActivity.LeftAnimationTrackListener
                 !failed &&
                 ConnectionState.INSTANCE.isWifiConnected())
             {
-              Location loc = LocationHelper.INSTANCE.getSavedLocation();
+              Location loc = LocationHelper.from(mActivity).getSavedLocation();
               if (loc != null)
               {
                 String country = MapManager.nativeFindCountry(loc.getLatitude(), loc.getLongitude());
@@ -168,7 +168,6 @@ public class OnmapDownloader implements MwmActivity.LeftAnimationTrackListener
                     MapManager.nativeHasSpaceToDownloadCountry(country))
                 {
                   MapManager.nativeDownload(mCurrentCountry.id);
-                  mActivity.requestPostNotificationsPermission();
                 }
               }
             }

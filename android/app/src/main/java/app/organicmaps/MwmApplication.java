@@ -64,6 +64,10 @@ public class MwmApplication extends Application implements Application.ActivityL
 
   @SuppressWarnings("NotNullFieldNotInitialized")
   @NonNull
+  private LocationHelper mLocationHelper;
+
+  @SuppressWarnings("NotNullFieldNotInitialized")
+  @NonNull
   private SensorHelper mSensorHelper;
 
   private volatile boolean mFrameworkInitialized;
@@ -95,6 +99,12 @@ public class MwmApplication extends Application implements Application.ActivityL
   public IsolinesManager getIsolinesManager()
   {
     return mIsolinesManager;
+  }
+
+  @NonNull
+  public LocationHelper getLocationHelper()
+  {
+    return mLocationHelper;
   }
 
   @NonNull
@@ -144,6 +154,7 @@ public class MwmApplication extends Application implements Application.ActivityL
     registerActivityLifecycleCallbacks(this);
     mSubwayManager = new SubwayManager(this);
     mIsolinesManager = new IsolinesManager(this);
+    mLocationHelper = new LocationHelper(this);
     mSensorHelper = new SensorHelper(this);
   }
 
@@ -153,10 +164,10 @@ public class MwmApplication extends Application implements Application.ActivityL
    * @throws IOException - if failed to create directories. Caller must handle
    * the exception and do nothing with native code if initialization is failed.
    */
-  public void init() throws IOException
+  public boolean init(SplashActivity listener) throws IOException
   {
     initNativePlatform();
-    initNativeFramework();
+    return initNativeFramework(listener);
   }
 
   private void initNativePlatform() throws IOException
@@ -203,12 +214,12 @@ public class MwmApplication extends Application implements Application.ActivityL
     StorageUtils.requireDirectory(tempPath);
   }
 
-  private void initNativeFramework()
+  private boolean initNativeFramework(SplashActivity listener)
   {
     if (mFrameworkInitialized)
-      return;
+      return false;
 
-    nativeInitFramework();
+    nativeInitFramework(listener);
 
     MapManager.nativeSubscribe(mStorageCallbacks);
 
@@ -218,15 +229,15 @@ public class MwmApplication extends Application implements Application.ActivityL
     BookmarkManager.loadBookmarks();
     TtsPlayer.INSTANCE.initialize(this);
     ThemeSwitcher.INSTANCE.restart(false);
-    LocationHelper.INSTANCE.initialize(this);
-    RoutingController.get().initialize(null);
+    RoutingController.get().initialize(this);
     TrafficManager.INSTANCE.initialize(null);
     SubwayManager.from(this).initialize(null);
     IsolinesManager.from(this).initialize(null);
+    ProcessLifecycleOwner.get().getLifecycle().addObserver(mProcessLifecycleObserver);
 
     Logger.i(TAG, "Framework initialized");
     mFrameworkInitialized = true;
-    ProcessLifecycleOwner.get().getLifecycle().addObserver(mProcessLifecycleObserver);
+    return true;
   }
 
   private void initNativeStrings()
@@ -274,7 +285,7 @@ public class MwmApplication extends Application implements Application.ActivityL
   private native void nativeInitPlatform(String apkPath, String writablePath, String privatePath,
                                          String tmpPath, String flavorName, String buildType,
                                          boolean isTablet);
-  private static native void nativeInitFramework();
+  private static native void nativeInitFramework(SplashActivity listener);
   private static native void nativeProcessTask(long taskPointer);
   private static native void nativeAddLocalization(String name, String value);
   private static native void nativeOnTransit(boolean foreground);
@@ -339,7 +350,7 @@ public class MwmApplication extends Application implements Application.ActivityL
 
     nativeOnTransit(true);
 
-    LocationHelper.INSTANCE.resumeLocationInForeground();
+    mLocationHelper.resumeLocationInForeground();
   }
 
   private void onBackground()
@@ -355,7 +366,7 @@ public class MwmApplication extends Application implements Application.ActivityL
       Logger.i(LOCATION_TAG, "Navigation is in progress, keeping location in the background");
       return;
     }
-    LocationHelper.INSTANCE.stop();
+    mLocationHelper.stop();
   }
 
   private class StorageCallbackImpl implements MapManager.StorageCallback

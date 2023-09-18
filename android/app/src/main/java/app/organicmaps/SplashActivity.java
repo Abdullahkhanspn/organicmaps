@@ -142,9 +142,10 @@ public class SplashActivity extends AppCompatActivity
   private void init()
   {
     MwmApplication app = MwmApplication.from(this);
+    boolean asyncContinue = false;
     try
     {
-      app.init();
+      asyncContinue = app.init(this);
     } catch (IOException e)
     {
       showFatalErrorDialog(R.string.dialog_error_storage_title, R.string.dialog_error_storage_message);
@@ -155,16 +156,19 @@ public class SplashActivity extends AppCompatActivity
         (ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
          ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED))
     {
-      LocationHelper.INSTANCE.onEnteredIntoFirstRun();
-      if (!LocationHelper.INSTANCE.isActive())
-        LocationHelper.INSTANCE.start();
+      final LocationHelper locationHelper = app.getLocationHelper();
+      locationHelper.onEnteredIntoFirstRun();
+      if (!locationHelper.isActive())
+        locationHelper.start();
     }
 
-    processNavigation();
+    if (!asyncContinue)
+      processNavigation();
   }
 
-  @SuppressWarnings("unchecked")
-  private void processNavigation()
+  // Called from MwmApplication::nativeInitFramework like callback.
+  @SuppressWarnings({"unused", "unchecked"})
+  public void processNavigation()
   {
     Intent input = getIntent();
     Intent result = new Intent(this, DownloadResourcesLegacyActivity.class);
